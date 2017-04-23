@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+<body onload="getWeather()">
+    <div>
+        <script>
+            getWeather = function(){
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    var lat = position.coords.latitude;
+                    var lng = position.coords.longitude;
+                    var latlng = Promise.resolve(lat + ',' + lng);
+                    latlng.then(function (data) {
+                        var x = new XMLHttpRequest();
+                        x.open("GET", "https://maps.googleapis.com/maps/api/geocode/json?latlng="+data+"&key=AIzaSyCbPS27m2n0VUCO9106Gt_LDOtJ6NQLi_U&language=en", true);
+                        x.onload = function (){
+                            var adres = x.responseText;
+                            adres = JSON.parse(adres);
+                            var loc = adres.results[0];
+                            var loca = loc.address_components;
+                            var locat = loca[3];
+                            var sity = locat.long_name;
+                            var div = document.createElement('div');
+                            div.innerHTML = '<strong>'+sity+'</strong>';
+                            document.body.insertBefore(div, document.body.firstChild);
+                            var coun = loca[6];
+                            var country = coun.short_name;
+                            var locati = Promise.resolve(sity+','+country);
+                            locati.then(function (location) {
+                                var y = new XMLHttpRequest();
+                                y.open("GET", "http://api.openweathermap.org/data/2.5/forecast?q="+location+"&APPID=095489dac259de3ab61d36e212b02ff3", true);
+                                y.onload = function () {
+                                    var weatherLocat = y.responseText;
+                                    weatherLocat = JSON.parse(weatherLocat);
+                                    var weather = weatherLocat.list;
+                                    var days = [weather[0], weather[8], weather[16], weather[24], weather[32]];
+                                    console.log(days);
+                                    days.forEach(function(item, i, days) {
+                                        var ic = item.weather;
+                                        var ico = ic[0];
+                                        var imag = ico.icon;
+                                        document.getElementById(i).innerHTML =
+                                                '<ins>'+item.dt_txt+'</ins>'+
+                                                '<div>t='+(item.main.temp-273.15).toFixed(1)+' C</div>'+
+                                                '<img src="https://openweathermap.org/img/w/'+imag+'.png">'
+                                    });
+                                };
+                                y.send(null);
+                            })
+                        };
+                        x.send(null);
+                    });
+                });
+            }
+        </script>
+
+        <div class="text-center" id="0" style="background-color:lightblue; width:100px; border: solid 2px red"></div>
+        <div class="text-center" id="1" style="background-color:lightblue; width:100px; border: solid 2px yellow"></div>
+        <div class="text-center" id="2" style="background-color:lightblue; width:100px; border: solid 2px green"></div>
+        <div class="text-center" id="3" style="background-color:lightblue; width:100px; border: solid 2px blue"></div>
+        <div class="text-center" id="4" style="background-color:lightblue; width:100px; border: solid 2px rebeccapurple"></div>
+
+    </div>
+</body>
+</html>
